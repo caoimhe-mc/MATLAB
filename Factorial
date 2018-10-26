@@ -1,0 +1,9 @@
+
+N=input('enter n:');
+%initialise m
+m = 1;
+for i=1:N 
+    m=(m)*(i);
+end
+
+fprintf('%d', m)
