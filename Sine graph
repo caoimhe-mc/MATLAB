@@ -1,0 +1,11 @@
+n= input('enter n:');
+x=-2*pi:pi/32:2*pi;
+hold on;
+
+%sin(n*x)
+
+for i=1:n
+    y=sin(x*i);
+    plot(x,y);
+end  
+hold off;
