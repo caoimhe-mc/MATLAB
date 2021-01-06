@@ -1,0 +1,8 @@
+function[weight,massTotal,massFuel]= findWeight(startingMassFuel,burnTime,massEmptyRocket,massHorse,gravity,t,dt)
+massFuel=startingMassFuel-((t*dt)/burnTime)*startingMassFuel;%equation to calculate mass fuel assuming it is used linearly 
+if massFuel<0
+   massFuel=0; %ensures no values of mass fuel are negative
+end
+massTotal=massFuel+massEmptyRocket+massHorse; %calculates total mass
+weight=massTotal*gravity;                     %finds weight in N
+end
