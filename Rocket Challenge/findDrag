@@ -1,0 +1,4 @@
+function[drag]=findDrag(density,velocity,t,crossSectionalArea,dragCoefficient)
+drag=(1/2)*density*(velocity(t))^2*dragCoefficient*crossSectionalArea*sign(velocity(t));
+%drag calculated using drag equation, sign function is used to ensure that the drag opposes the motion of the rocket
+end
