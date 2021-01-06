@@ -1,0 +1,4 @@
+function[density]= findDensity(position,densitySI,t)
+positionAdjusted=round((position(t)/1000)); %takes position in m and rounds to nearest km, as density data provided has altitude in kilometres
+density= densitySI(positionAdjusted+1);     %The +1 is to ensure the altitude matches with the correct density
+end
