@@ -1,0 +1,3 @@
+function[velcocityImpact]= kaboomSpeed(velocity,flightTime,dt)
+velcocityImpact= velocity(fix(flightTime/dt)); %Determines time when rocket lands, calculates velocity at this time= velocityImpact
+end
