@@ -1,0 +1,3 @@
+function [MaxHeight]= maxHeight(position,flightTime,dt)
+    MaxHeight=max(position(1:fix(flightTime/dt))); %takes the max value from position for time rocket is determined to be flying, fix() removes floating point error 
+end
