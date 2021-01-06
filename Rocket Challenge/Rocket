@@ -1,0 +1,223 @@
+clear variables 
+%close all 
+
+cd C:\Users\Caoimhe\Documents\Final_Version
+%Read in all txt files from this directory
+mylist=ls('*.txt');
+mylist=string(mylist);
+
+%Creates an array for each rocket/horse combo with every data point
+SIZE =3250;
+timeArray = zeros(SIZE,3);
+positionArray = zeros(SIZE,3);
+velocityArray = zeros(SIZE,3);
+dragArray = zeros(SIZE,3);
+accelerationArray = zeros(SIZE,3);
+densityArray = zeros(SIZE,3);
+massArray = zeros(SIZE,3);
+
+%loop to have each rocket complete the functions
+for a = 1:1:length(mylist)
+    
+    fid = fopen(mylist(a),'r');
+    formatspec = '%i\r\n %i\r\n %i\r\n %i\r\n %i\r\n %i\r\n i';
+    %removes error while reading in decimal values
+    if a==3
+       formatspec='%i\r\n %i\r\n %i\r\n %i\r\n %f\r\n %i\r\n %f\r\n ';
+    end
+    mydat=fscanf(fid,formatspec);
+    massEmptyRocket = mydat(1);
+    startingMassFuel = mydat(2);
+    engineThrust = mydat(3);
+    burnTime = mydat(4);
+    diameter= mydat(5);
+    massHorse= mydat(6);
+    fclose(fid);
+
+    %List all remaining the variables needed
+    massTotal = massEmptyRocket + startingMassFuel +massHorse; % kg
+    gravity = 9.81; %m/s/s
+    dragCoefficient = .05;
+    crossSectionalArea=(((diameter)/2)^2)*(pi);
+    weight = massTotal * gravity; %Constant for now
+    dt = .1; % timeStep duration in seconds
+    endTime = 325; % Seconds
+    drag = zeros(1,endTime/dt);
+    density = zeros(1,endTime/dt); %kg/m3
+    acceleration = zeros(1,endTime/dt); %Create empty vector of zeros for Acceleration Data the length of the simulation
+    time = zeros(1,endTime/dt);         %Create empty vector of zeros for time Data
+    massFuel = zeros(1,endTime/dt);
+    
+
+    %Read in Excel file and adjust Density to SI units
+    filename='DensityData.xlsx';
+    HD=xlsread(filename);
+    densitySI=HD(:,2)*1000;
+
+    %start a loop to calculate our equations of motion at each Time Step
+
+for t = 1:1:(endTime/dt) %   t is the current TimeStep
+    
+time(t) = t*dt; 
+%Calculate the velocity and Position, by integrating.
+velocity = cumtrapz(time,acceleration);
+position = cumtrapz(time,velocity);
+
+
+% Calculates density as a function which is dependent on position
+density(t)=findDensity(position,densitySI,t);
+
+%Calculates Drag as a function for every time step
+drag(t)= findDrag(density(t),velocity,t,crossSectionalArea,dragCoefficient);
+
+
+%Calaculates weight as a function which decreases due to fuel being used
+ [weight,massTotal,massFuel(t)]=findWeight(startingMassFuel,burnTime,massEmptyRocket,massHorse,gravity,t,dt);
+
+
+%Equation of motion
+   
+    if t <= (burnTime/dt) %while the engines are firing
+ 
+%PART 8: Change code to use time varying for drag, weight and massTotal calculated in part 5-7. Replace equation with
+%acceleration(t) =  (engineThrust - drag(t) - weight(t)) /massTotal(t);
+%need to make so drag is positive when moving downwards
+
+        acceleration(t) =  (engineThrust - drag(t) - weight) /massTotal;
+        
+% PART 8: Change code to use time varying for drag, weight and Mass Total calculated in Parts 5-7. Replace equation with
+%acceleration(t) =  (- drag(t) - weight(t)) /massTotal(t);
+
+    else %when the engines have stopped firing
+        
+        acceleration(t) =  (-drag(t) - weight) /massTotal;
+        
+    end
+
+ % PART 1 & PART 2 Add code here: check if the position <0 and display
+ % the time when this happens and (PART 2) break out of loop to end simulaiton.
+ if position(t)<0
+        flightTime=time(t)
+        position(t:3250)=0;
+        break
+ end
+    
+end
+
+    %Add code for PART 3 here. Write a function (named maxHeight.m) which
+    %calculates the max height during the flight. Display the output of the
+    %function in the command window.
+    MaxHeight=maxHeight(position,flightTime,dt)
+
+    %Add code for PART 4 here. Write a function to calculate velocity at impact (kaboomSpeed.m). 
+    % Add to the code it outputs the value in command window.
+
+    velocityImpact=kaboomSpeed(velocity,flightTime,dt)
+    
+    
+    accelerationArray(:,a) = acceleration(:,:);
+    densityArray(:,a) = density(:,:);
+    dragArray(:,a) = drag(:,:);
+    massArray(:,a) = massFuel(:,:);
+    positionArray(:,a) = position(:,:);
+    timeArray(:,a) = time(:,:);
+    velocityArray(:,a) = velocity(:,:);
+    
+end
+
+%Plots adjusted to end at flightTime
+%Additional graphs inserted with legends
+%Hold on applied to plot 3 results on 1 graph
+%plot results
+figure();
+plot(time(1:fix(flightTime/dt)), accelerationArray(1:fix(flightTime/dt), 1))
+hold on 
+plot(time(1:fix(flightTime/dt)), accelerationArray(1:fix(flightTime/dt), 2))
+hold on 
+plot(time(1:fix(flightTime/dt)), accelerationArray(1:fix(flightTime/dt), 3))
+hold on
+title ('Acceleration vs Time - Simple Rocket')
+xlabel('Time - (s)')
+ylabel('acceleration - (m/s^2)')
+grid on
+legend('BF Rocket', 'Elsie Rocket', 'Flubber Rocket')
+
+
+figure();
+plot(time(1:fix(flightTime/dt)), velocityArray(1:fix(flightTime/dt), 1))
+hold on 
+plot(time(1:fix(flightTime/dt)), velocityArray(1:fix(flightTime/dt), 2))
+hold on 
+plot(time(1:fix(flightTime/dt)), velocityArray(1:fix(flightTime/dt),3))
+hold on
+title ('Velocity vs Time - Simple Rocket')
+xlabel('Time - (s)')
+ylabel('velocity - (m/s)')
+grid on
+legend('BF Rocket', 'Elsie Rocket', 'Flubber Rocket')
+
+
+figure();
+plot(time(1:fix(flightTime/dt)), positionArray(1:fix(flightTime/dt),1))
+hold on 
+plot(time(1:fix(flightTime/dt)), positionArray(1:fix(flightTime/dt),2))
+hold on 
+plot(time(1:fix(flightTime/dt)), positionArray(1:fix(flightTime/dt), 3))
+hold on 
+title ('Position vs Time - Simple Rocket')
+xlabel('Time - (s)')
+ylabel('Height - (m)')
+grid on
+legend('BF Rocket', 'Elsie Rocket', 'Flubber Rocket')
+
+figure();
+plot(time(1:fix(flightTime/dt)), massArray(1:fix(flightTime/dt),1))
+hold on 
+plot(time(1:fix(flightTime/dt)), massArray(1:fix(flightTime/dt),2))
+hold on 
+plot(time(1:fix(flightTime/dt)), massArray(1:fix(flightTime/dt),3))
+hold on
+title ('Fuel Mass vs Time - Simple Rocket')
+xlabel('Time - (s)')
+ylabel('Fuel Mass - (kg)')
+grid on
+legend('BF Rocket', 'Elsie Rocket', 'Flubber Rocket')
+
+figure();
+plot(time(1:fix(flightTime/dt)), densityArray(1:fix(flightTime/dt),1) )
+hold on 
+plot(time(1:fix(flightTime/dt)), densityArray(1:fix(flightTime/dt),2) )
+hold on 
+plot(time(1:fix(flightTime/dt)), densityArray(1:fix(flightTime/dt),3) )
+hold on 
+title ('Density vs Time - Simple Rocket')
+xlabel('Time - (s)')
+ylabel('Density - (kg/m^3)')
+grid on
+legend('BF Rocket', 'Elsie Rocket', 'Flubber Rocket')
+
+figure();
+plot(positionArray(1:fix(flightTime/dt),1),densityArray(1:fix(flightTime/dt),1) )
+hold on 
+plot(positionArray(1:fix(flightTime/dt),2),densityArray(1:fix(flightTime/dt),2) )
+hold on 
+plot(positionArray(1:fix(flightTime/dt),3),densityArray(1:fix(flightTime/dt),3) )
+hold on
+title ('Density vs Position - Simple Rocket')
+xlabel('Position - (m)')
+ylabel('Density - (kg/m^3)')
+grid on
+legend('BF Rocket', 'Elsie Rocket', 'Flubber Rocket')
+ 
+figure();
+plot(time(1:fix(flightTime/dt)),abs(dragArray(1:fix(flightTime/dt),1)) )
+hold on 
+plot(time(1:fix(flightTime/dt)),abs(dragArray(1:fix(flightTime/dt),2)) )
+hold on 
+plot(time(1:fix(flightTime/dt)),abs(dragArray(1:fix(flightTime/dt),3)) )
+hold on 
+title ('Drag vs Time - Simple Rocket')
+xlabel('Time - (s)')
+ylabel('Drag - (N)')
+grid on
+legend('BF Rocket', 'Elsie Rocket', 'Flubber Rocket')
