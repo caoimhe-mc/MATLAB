@@ -1,0 +1,62 @@
+function [redlichVolume, idealVolume] = redlich(T, P, R, Tc, Pc)
+    %calculates the molar volume of a gas predicted by the Redlich-Kwong
+    %equation using the Newton-Raphson algorithm with the initial element
+    %determined by the ideal gas law equation.
+    % Inputs:
+    % R (real scalar) ideal gas constant in L atm/ K mol.
+    % T (real scalar, non-negative) equals temperature in K.
+    % P (real scalar, positive) equals pressure in atm
+    % Tc (real scalar, non-negative) equals the critical temperature in K of the gas
+    % Pc (real scalar, positive) equals the critcial pressure in atm of the gas.
+    % Outputs:
+    % redlichVolume equals molar volume in L/mol as predicted by the Redlich-Kwong equation
+    % idealVolume equals the molar volume in L/mol as predicted by the Ideal
+    % Gas Law
+
+    %a for loop is used on all the input values to ensure that are positive
+    %real numbers and an error is diplayed if the input does not meet the criteria
+    for k = [R T P Tc Pc]
+        if (~isscalar(k)) || (~isreal(k)) || k <= 0
+            error('Input is invalid')
+        end
+    end   
+
+    idealVolume =  [(R*T./P)]; %calculates the volume using the ideal gas law for each value of pressure
+   
+    a = ((R^2)*Tc^(5/2))/(Pc*9*(nthroot(2,3)-1)); %determines the constant a
+    b = ((nthroot(2,3)-1)*R*Tc)/(3*Pc); %determines the constant b
+    A = (a.*P)/((R^2)*(T)^(5/2)); %determines the constant A
+    B = (b.*P)/(R*T); %determines the constant B
+
+    redlichVolume = (R*T)./P; %ideal gas law to identify initial value of volume
+    Z = (P.*redlichVolume)/(R*T); %inital value for Z 
+    f = Z.^3-Z.^2+(A-B-B.^2).*Z-A.*B; %function of Z
+
+    tolerance = 10e-6; % the limit to determine when to terminate
+    iteration = 25; %determines the number of iterations if the tolerance is never reached
+    count = 0; %initalise a counter to determine how many iterations have been completed
+
+    for N = 1:iteration+1
+
+        %terminates the loop if the values do not converge within the iteration
+        %limit
+        if count == iteration + 1
+            error('Iteration limit reached. Iteration did not converge.')
+            break
+        end
+        f = Z.^3-Z.^2+(A-B-B.^2).*Z-A.*B; %function of Z
+        
+        %terminates the loop if the absolute value becomes within the tolerance value     
+        if abs(f)<tolerance
+            return
+        end
+
+        df = 3*Z.^2-2.*Z+(A-B+B.^2)-A.*B; %udpate the value of the derivative of the function
+        Z = Z -f./df; %updates the value of Z
+
+        redlichVolume = [(Z*R*T)./P]; %determines the volume dependent on the given value of Z
+        count = count + 1; %updates how many iterations have occured
+
+    end
+
+end
