@@ -1,0 +1,52 @@
+function [f, N] = darcyFriction(k, Re)
+%Calculates the Darcy friction factor based on the Colebrook-White
+%equation using the Newton-Raphson algorithm with the initial element
+%determined by the Swamee-Jain equation
+%Inputs
+%k (real scalar, non negative) relative roughness of the pipe 
+%which is dimensionless
+%Re (real scalar, non negative) Reynolds number of the flow 
+%which is dimensionless
+%Outputs
+%f (real scalar, non negative) Darcy friction factor coefficient 
+%which is dimensionless
+%N the number of iterations required
+
+%Version 1: created 18/02/2021. Author: C.McCann
+
+%a for loop is used to determine if the inputs are valid
+for m = [k Re]
+    if (~isscalar(m)) || (~isreal(m)) || m <= 0
+        error('Input is invalid')
+    end
+end
+
+% intialise the first estimate using the Swamee-Jain equation
+f = (1.325)/(log((k/3.7)+(5.74/Re^0.9)))^2;
+
+
+tolerance = 10e-8; %the limit to determine when to terminate
+iteration = 20;    %determines the number of iterations if the tolerance is never 
+                   %reached
+
+for N = 1:iteration+1
+
+    %terminates the loop if the values do not converge 
+    %within the iteration limit
+    if N == iteration + 1
+        error('Iteration limit reached. Iteration did not converge.')
+    end
+
+    %updates the value of the function
+    g = 1/sqrt(f) + 2*log10((k/3.7)+2.51/(Re*sqrt(f)));
+
+    %terminates the loop if the absolute value becomes within the tolerance value     
+    if abs(g)<tolerance
+        return
+    end
+
+    %updates the value of the derivative
+    dg = -0.5*f^(-3/2)*(1+(2*2.51)/(log(10)*((k/3.7)+2.51/(Re*sqrt(f)))*Re));
+    f = f - g/dg; %updates the value of the friction factor
+end
+end
