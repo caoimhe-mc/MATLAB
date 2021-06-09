@@ -1,6 +1,6 @@
 function [redlichVolume, idealVolume] = redlich(T, P, R, Tc, Pc)
     %calculates the molar volume of a gas predicted by the Redlich-Kwong
-    %equation using the Newton-Raphson algorithm with the initial element
+    %equation using the Newton-Raphson iterative algorithm with the initial element
     %determined by the ideal gas law equation.
     % Inputs:
     % R (real scalar) ideal gas constant in L atm/ K mol.
@@ -17,7 +17,7 @@ function [redlichVolume, idealVolume] = redlich(T, P, R, Tc, Pc)
     %real numbers and an error is diplayed if the input does not meet the criteria
     for k = [R T P Tc Pc]
         if (~isscalar(k)) || (~isreal(k)) || k <= 0
-            error('Input is invalid')
+            error('Input is invalid, input must be real, scalar and greater than zero')
         end
     end   
 
