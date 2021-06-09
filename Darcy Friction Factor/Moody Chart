@@ -1,0 +1,48 @@
+%sample values for relative roughness
+k = [0.001 0.002 0.003 0.004 0.005 0.007 0.01 0.02 0.05];
+
+%sample values for Relative roughness
+Re = logspace(2.8,8.7,500);
+
+%vector containing zeros to store value for friction factor
+frictionFactor1 = 100*zeros(100,9);
+
+% a for loop to calculate the friction factor for every combination of k and Re and store value
+for a = 1:length(k)
+    f = k(a);
+        for b = 1:length(Re)
+            R = Re(b);
+            friction = darcyFriction(f, R);
+            frictionFactor1(b,a) = friction;   
+        end
+end
+
+%plot Friction Factor vs Reynolds' number
+for d = 1:9
+    semilogx(Re, frictionFactor1(:,d))
+    hold on
+end   
+hold off
+
+grid on 
+title('Moody Chart')
+xlabel('Reynolds Number')
+xlim([10^2 10^9])
+yyaxis left
+ylim([0.015 0.1])
+ylabel('Friction Factor')
+
+%plot relative roughness value at the end of the line
+for e = 1:length(k)
+    txt = num2str(k(e));
+    text(10e8,frictionFactor1(end,e),txt,'HorizontalAlignment', 'left');   
+end
+
+yyaxis right
+ylabel(['Relative Roughness (',char(949),'/D)'],'color','k')
+yl=get(gca,'ylabel');
+pyl = get(yl,'position');
+pyl(1) = 1.08*pyl(1);
+set(yl,'position',pyl)
+set(gca,'ytick',[])
+set(gca,'ycolor','k')
