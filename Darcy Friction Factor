@@ -17,7 +17,7 @@ function [f, N] = darcyFriction(k, Re)
 %a for loop is used to determine if the inputs are valid
 for m = [k Re]
     if (~isscalar(m)) || (~isreal(m)) || m <= 0
-        error('Input is invalid')
+        error('Input is invalid, input must be real, scalar and greater than zero')
     end
 end
 
