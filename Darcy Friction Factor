@@ -1,6 +1,6 @@
 function [f, N] = darcyFriction(k, Re)
 %Calculates the Darcy friction factor based on the Colebrook-White
-%equation using the Newton-Raphson algorithm with the initial element
+%equation using the Newton-Raphson iterative algorithm with the initial element
 %determined by the Swamee-Jain equation
 %Inputs
 %k (real scalar, non negative) relative roughness of the pipe 
