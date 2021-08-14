@@ -5,7 +5,7 @@ P = [1:0.5:100];
 Pi = [1:0.5:3 5:5:15 25 50 100];%vector of the pressures for which the calculations are being carried out on 
 
 for j= 1:length(Pi)
-    pressure = Pi(j); %lets p equal the j th value of the veotr P
+    pressure = Pi(j); %lets p equal the j th value of the vector P
     [volume(count), iterations(count)] = redlich(pressure); %calcuates the redlich volume for the given pressure
     volumeIdeal =  (0.082057*293./P)'; %ideal gas law calculation
     count = count + 1; %update the counter
