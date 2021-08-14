@@ -2,7 +2,7 @@ volume = 11*zeros(11,1); %empty vector which will be used to hold the values of 
 iterations = 11*zeros(11,1); %empty vector which will be used to hold the value for iterations
 count = 1; %count which will be used to assign vector places 
 P = [1:0.5:100];
-Pi = [1:0.5:3 5:5:15 25 50 100];%vector of the pressures for which the calculations are being carried out on 
+Pi = [1:0.5:3 5:5:15 25 50 100]; %vector of the pressures for which the calculations are being carried out on 
 
 for j= 1:length(Pi)
     pressure = Pi(j); %lets p equal the j th value of the vector P
